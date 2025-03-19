@@ -174,3 +174,5 @@ cython_debug/
 .DS_Store
 .idea/
 
+# Игнорируем папку user_reports
+user_reports/

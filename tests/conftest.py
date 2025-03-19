@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 from pytest import fixture
@@ -169,9 +169,9 @@ def transactions_data():
 @fixture
 def investment_bank_data():
     return [
-        {"Дата операции": "2025-03-10", "Сумма операции": 450, "Описание": "Оплата услуг"},
-        {"Дата операции": "2025-03-15", "Сумма операции": 1200, "Описание": "Перевод Иван И."},
-        {"Дата операции": "2025-03-20", "Сумма операции": 999, "Описание": "Покупка в магазине"},
+        {"Дата платежа": "10.03.2025", "Сумма операции": 450, "Описание": "Оплата услуг"},
+        {"Дата платежа": "15.03.2025", "Сумма операции": 1200, "Описание": "Перевод Иван И."},
+        {"Дата платежа": "20.03.2025", "Сумма операции": 999, "Описание": "Покупка в магазине"},
     ]
 
 
@@ -318,3 +318,17 @@ def mock_exchange_rates():
 @fixture
 def mock_stock_prices():
     return {"AAPL": 150.0, "GOOGL": 2800.0}
+
+
+@fixture
+def sample_transactions():
+    data = {
+        "Дата платежа": [
+            (datetime.today() - timedelta(days=10)).strftime("%d.%m.%Y"),
+            (datetime.today() - timedelta(days=100)).strftime("%d.%m.%Y"),
+            (datetime.today() - timedelta(days=30)).strftime("%d.%m.%Y"),
+        ],
+        "Категория": ["Еда", "Одежда", "Еда"],
+        "Сумма платежа": [500, 1000, 200],
+    }
+    return pd.DataFrame(data)

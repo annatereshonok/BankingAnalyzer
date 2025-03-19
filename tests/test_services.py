@@ -1,5 +1,4 @@
 import json
-from unittest.mock import patch
 
 from src.services import (
     best_cashback_categories,
@@ -50,67 +49,37 @@ def test_investment_bank_error(investment_bank_fixture_error):
     assert result == expected
 
 
-@patch("src.services.read_file")
-def test_search_by_word(mock_read_file, search_word_fixture):
-    mock_read_file.return_value.to_dict.return_value = search_word_fixture
-    result = search_by_word("метро")
+def test_search_by_word(search_word_fixture):
+    result = search_by_word(search_word_fixture, "метро")
     expected = '[{"Описание": "Метро Санкт-Петербург"}, {"Описание": "Метро Мск"}]'
     assert json.loads(result) == json.loads(expected)
 
 
-@patch("src.services.read_file", side_effect=FileNotFoundError)
-def test_test_search_by_word_filenotfound(mock_read_file):
-    result = search_by_word("метро")
-    expected = "[{}]"
+def test_test_search_by_word_exception(search_word_fixture):
+    result = search_by_word(search_word_fixture, "что-то")
+    expected = "[]"
     assert json.loads(result) == json.loads(expected)
 
 
-@patch("src.services.read_file", side_effect=Exception)
-def test_test_search_by_word_exception(mock_read_file):
-    result = search_by_word("метро")
-    expected = "[{}]"
-    assert json.loads(result) == json.loads(expected)
-
-
-@patch("src.services.read_file")
-def test_search_by_phone(mock_read_file, search_word_fixture):
-    mock_read_file.return_value.to_dict.return_value = search_word_fixture
-    result = search_by_phone()
+def test_search_by_phone(search_word_fixture):
+    result = search_by_phone(search_word_fixture)
     expected = '[{"Описание": "Перевод +7 987 65-43-21"}]'
     assert json.loads(result) == json.loads(expected)
 
 
-@patch("src.services.read_file", side_effect=FileNotFoundError)
-def test_search_by_phone_filenotfound(mock_read_file):
-    result = search_by_phone()
-    expected = "[{}]"
+def test_search_by_phone_exception():
+    result = search_by_phone([])
+    expected = "[]"
     assert json.loads(result) == json.loads(expected)
 
 
-@patch("src.services.read_file", side_effect=Exception)
-def test_search_by_phone_exception(mock_read_file):
-    result = search_by_phone()
-    expected = "[{}]"
-    assert json.loads(result) == json.loads(expected)
-
-
-@patch("src.services.read_file")
-def test_search_by_client_name(mock_read_file, search_word_fixture):
-    mock_read_file.return_value.to_dict.return_value = search_word_fixture
-    result = search_by_client_name()
+def test_search_by_client_name(search_word_fixture):
+    result = search_by_client_name(search_word_fixture)
     expected = '[{"Описание": "Оплата Василий П."}, {"Описание": "Оплата Петр В."}]'
     assert json.loads(result) == json.loads(expected)
 
 
-@patch("src.services.read_file", side_effect=FileNotFoundError)
-def test_search_by_client_name_filenotfound(mock_read_file):
-    result = search_by_client_name()
-    expected = "[{}]"
-    assert json.loads(result) == json.loads(expected)
-
-
-@patch("src.services.read_file", side_effect=Exception)
-def test_search_by_client_name_exception(mock_read_file):
-    result = search_by_client_name()
-    expected = "[{}]"
+def test_search_by_client_name_exception():
+    result = search_by_client_name([])
+    expected = "[]"
     assert json.loads(result) == json.loads(expected)

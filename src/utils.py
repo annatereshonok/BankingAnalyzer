@@ -101,12 +101,3 @@ def get_date_interval_events(input_date: str, range_type: str = "M") -> Tuple[da
         raise ValueError("Некорректный диапазон. Используйте W, M, Y или ALL.")
 
     return start_date, end_date
-
-
-# if __name__ == "__main__":
-#     df = read_file(filename="operations.xlsx")
-#     print(df.head(5).to_dict(orient="records"))
-#     print(get_greeting())
-#     print(get_date_interval(input_date='2024-03-15 14:25:00'))
-#     print(date('2024-03-15'))
-# print(get_date_interval_events("2021-03-15 17:05:00", "W"))

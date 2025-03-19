@@ -6,7 +6,6 @@ from operator import itemgetter
 from typing import Any, Dict, Hashable, List
 
 from src.logging_config import services_logger
-from src.utils import read_file
 
 
 def best_cashback_categories(data: List[Dict[Hashable, Any]], year: str, month: str) -> str:
@@ -65,7 +64,12 @@ def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) 
             services_logger.error("Некорректные типы данных для параметров")
             return 0.0
 
-        filtered_data = filter(lambda item: item.get("Дата операции", "").startswith(month), transactions)
+        filtered_data = filter(
+            lambda item: datetime.strptime(item.get("Дата платежа", ""), "%d.%m.%Y")
+            .strftime("%Y-%m")
+            .startswith(month),
+            transactions,
+        )
 
         deferred_amount = sum(
             (
@@ -77,7 +81,7 @@ def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) 
         )
 
         services_logger.info(f"Расчет завершен успешно. Отложенная сумма: {deferred_amount}")
-        return deferred_amount
+        return round(deferred_amount, 2)
 
     except KeyError as e:
         services_logger.error(f"Отсутствует необходимый ключ в данных: {e}")
@@ -88,76 +92,51 @@ def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) 
     return 0.0
 
 
-def search_by_word(search_words: str) -> str:
+def search_by_word(transactions: List[Dict[Hashable, Any]], search_words: str) -> str:
     """
     Ищет транзакции, содержащие указанные слова в описании.
 
+    :param transactions: список транзакуий
     :param search_words: Строка для поиска в описании транзакции.
     :return: JSON-строка с найденными транзакциями.
     """
     try:
-        transactions = read_file("operations.xlsx").to_dict(orient="records")
         filtered_data = filter(
             lambda item: re.findall(search_words, item.get("Описание", ""), flags=re.I), transactions
         )
         return json.dumps(list(filtered_data), ensure_ascii=False, indent=4)
-    except FileNotFoundError:
-        services_logger.error("Файл operations.xlsx не найден.")
-        return "[{}]"
     except Exception as e:
         services_logger.error(f"Ошибка при поиске транзакций: {e}")
-        return "[{}]"
+        return "[]"
 
 
-def search_by_phone() -> str:
+def search_by_phone(transactions: List[Dict[Hashable, Any]]) -> str:
     """
     Ищет транзакции, содержащие телефонные номера в описании.
 
+    :param transactions: список транзакуий
     :return: JSON-строка с найденными транзакциями.
     """
     try:
-        transactions = read_file("operations.xlsx").to_dict(orient="records")
         pattern = r"\+7\s?\d{3}\s?\d{2}-\d{2}-\d{2}"
         filtered_data = filter(lambda item: re.search(pattern, item.get("Описание", "")), transactions)
         return json.dumps(list(filtered_data), ensure_ascii=False, indent=4)
-    except FileNotFoundError:
-        services_logger.error("Файл operations.xlsx не найден.")
-        return "[{}]"
     except Exception as e:
         services_logger.error(f"Ошибка при поиске номеров телефонов: {e}")
-        return "[{}]"
+        return "[]"
 
 
-def search_by_client_name() -> str:
+def search_by_client_name(transactions: List[Dict[Hashable, Any]]) -> str:
     """
     Ищет транзакции, содержащие имя и первую букву фамилии в описании.
 
+    :param transactions: список транзакуий
     :return: JSON-строка с найденными транзакциями.
     """
     try:
-        transactions = read_file("operations.xlsx").to_dict(orient="records")
         pattern = r"\b[А-ЯЁ][а-яё]+\s[А-Я]\."
         filtered_data = filter(lambda item: re.search(pattern, item.get("Описание", "")), transactions)
         return json.dumps(list(filtered_data), ensure_ascii=False, indent=4)
-    except FileNotFoundError:
-        services_logger.error("Файл operations.xlsx не найден.")
-        return "[{}]"
     except Exception as e:
         services_logger.error(f"Ошибка при поиске имен клиентов: {e}")
-        return "[{}]"
-
-
-# if __name__ == "__main__":
-# data = [
-#     {"Дата операции": "2021-01-01", "Сумма операции": 241},  # 241 → 250 (шаг 10, 50, 100)
-#     {"Дата операции": "2021-01-02", "Сумма операции": 1712},  # 1720 (шаг 10), 1750 (шаг 50), 1800 (шаг 100)
-#     {"Дата операции": "2021-01-03", "Сумма операции": 355},  # 360 (шаг 10), 400 (шаг 50, 100)
-#     {"Дата операции": "2021-01-04", "Сумма операции": 98},  # 100 (шаг 10, 50, 100)
-#     {"Дата операции": "2021-01-05", "Сумма операции": 523},  # 530 (шаг 10), 550 (шаг 50), 600 (шаг 100)
-#     {"Дата операции": "2021-01-06", "Сумма операции": 1499},  # 1500 (шаг 10, 50, 100)
-#     {"Дата операции": "2021-01-07", "Сумма операции": 700},  # 700 (не округляется)
-#     {"Дата операции": "2021-01-08", "Сумма операции": 3151},  # 3160 (шаг 10), 3200 (шаг 50, 100)
-# ]
-# print(investment_bank(month="2021-01", transactions=data, limit=50))
-# print(search_by_phone())
-# print(search_by_client_name())
+        return "[]"
