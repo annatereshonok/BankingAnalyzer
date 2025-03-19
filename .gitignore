@@ -169,3 +169,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+.DS_Store
+.idea/
+
+# Игнорируем папку user_reports
+user_reports/
